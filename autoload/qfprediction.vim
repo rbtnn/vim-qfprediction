@@ -57,7 +57,7 @@ function! s:qf_goto_win_with_qfl_file() abort
 			break
 		endif
 		if wnr == 1
-			let wnr == winnr('$')
+			let wnr = winnr('$')
 		else
 			let wnr -= 1
 		endif
@@ -71,6 +71,7 @@ function! s:qf_goto_win_with_qfl_file() abort
 			else
 				let wnr = winnr() + 1
 			endif
+			break
 		endif
 		if (altwin == -1) && !getbufvar(winbufnr(wnr), '&previewwindow') && empty(getbufvar(winbufnr(wnr), '&buftype'))
 			let altwin = wnr
