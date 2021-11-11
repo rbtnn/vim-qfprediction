@@ -1,17 +1,33 @@
 
-" This is base on the qf_jump_open_window function in vim repo src/quickfix.c.
+" This is base on the qf_jump_open_window function in {vim-repo}/src/quickfix.c.
 
 function! qfprediction#get() abort
-	return s:qf_jump_open_window()
+	let x = s:qf_jump_open_window()
+	if !empty(x)
+		return x
+	endif
+	return s:qf_jump_to_buffer()
 endfunction
 
 
+
+function! s:qf_jump_to_buffer() abort
+	let curr = s:qf_curr()
+	if !empty(curr)
+		return s:debug({ 'tabnr': tabpagenr(), 'winnr': winnr() }, 'qf_jump_to_buffer')
+	else
+		return s:debug({}, 'qf_jump_to_buffer')
+	endif
+endfunction
 
 function! s:qf_jump_open_window() abort
 	if s:is_helpgrep() && !s:bt_help()
 		return s:jump_to_help_window()
 	endif
-	return s:qf_jump_to_usable_window()
+	if s:bt_quickfix()
+		return s:qf_jump_to_usable_window()
+	endif
+	return {}
 endfunction
 
 function! s:qf_jump_to_usable_window() abort
@@ -32,7 +48,7 @@ function! s:qf_jump_to_usable_window() abort
 endfunction
 
 function! s:qf_open_new_file_win() abort
-	return { 'split': v:true, }
+	return s:debug({ 'split': v:true, }, 'qf_open_new_file_win')
 endfunction
 
 function! s:qf_goto_tabwin_with_file() abort
@@ -40,19 +56,20 @@ function! s:qf_goto_tabwin_with_file() abort
 	let curr = s:qf_curr()
 	let xs = filter(deepcopy(wins), { i,x -> x['bufnr'] == curr['bufnr'] })
 	if !empty(xs)
-		return { 'tabnr': xs[0]['tabnr'], 'winnr': xs[0]['winnr'] }
+		return s:debug({ 'tabnr': xs[0]['tabnr'], 'winnr': xs[0]['winnr'] }, 'qf_goto_tabwin_with_file')
 	else
 		return {}
+	endif
 endfunction
 
 function! s:qf_find_win_with_normal_buf() abort
 	let wins = filter(getwininfo(), { i,x -> x['tabnr'] == tabpagenr() })
 	let xs = filter(deepcopy(wins), { i,x -> empty(getbufvar(x['bufnr'], '&buftype')) })
 	if !empty(xs)
-		return { 'tabnr': xs[0]['tabnr'], 'winnr': xs[0]['winnr'] }
+		return s:debug({ 'tabnr': xs[0]['tabnr'], 'winnr': xs[0]['winnr'] }, 'qf_find_win_with_normal_buf')
 	else
 		return {}
-	end
+	endif
 endfunction
 
 function! s:is_helpgrep() abort
@@ -64,10 +81,14 @@ function! s:jump_to_help_window() abort
 	let wins = filter(getwininfo(), { i,x -> x['tabnr'] == tabpagenr() })
 	let xs = filter(deepcopy(wins), { i,x -> getbufvar(x['bufnr'], '&buftype') == 'help' })
 	if !empty(xs)
-		return { 'tabnr': xs[0]['tabnr'], 'winnr': xs[0]['winnr'] }
+		return s:debug({ 'tabnr': xs[0]['tabnr'], 'winnr': xs[0]['winnr'] }, 'jump_to_help_window')
 	else
 		return {}
-	end
+	endif
+endfunction
+
+function! s:bt_quickfix() abort
+	return &buftype == 'quickfix'
 endfunction
 
 function! s:bt_help() abort
@@ -80,6 +101,14 @@ function! s:qf_curr() abort
 		return getqflist()[i - 1]
 	else
 		return {}
+	endif
+endfunction
+
+function! s:debug(d, msg) abort
+	if get(g:, 'qfprediction_debug', v:false)
+		return extend(a:d, { 'debug': a:msg })
+	else
+		return a:d
 	endif
 endfunction
 
