@@ -16,7 +16,7 @@ function! s:qf_jump_to_buffer() abort
 	if !empty(curr)
 		return s:debug({ 'tabnr': tabpagenr(), 'winnr': winnr() }, 'qf_jump_to_buffer')
 	else
-		return s:debug({}, 'qf_jump_to_buffer')
+		return {}
 	endif
 endfunction
 
