@@ -31,20 +31,52 @@ function! s:qf_jump_open_window() abort
 endfunction
 
 function! s:qf_jump_to_usable_window() abort
+	let usable_win = v:false
 	let x = s:qf_find_win_with_normal_buf()
 	if !empty(x)
-		return x
+		let usable_win = v:true
 	endif
-	if &switchbuf =~# 'usetab'
+	if !usable_win && (&switchbuf =~# 'usetab')
 		let x = s:qf_goto_tabwin_with_file()
 		if !empty(x)
 			return x
 		endif
 	endif
-	if winnr('$') == 1
+	if ((winnr('$') == 1) && s:bt_quickfix()) || !usable_win
 		return s:qf_open_new_file_win()
 	endif
-	return {}
+	return s:qf_goto_win_with_qfl_file()
+endfunction
+
+function! s:qf_goto_win_with_qfl_file() abort
+	let wnr = winnr()
+	let altwin = -1
+	let curr = s:qf_curr()
+	while 1
+		if winbufnr(wnr) == curr['bufnr']
+			break
+		endif
+		if wnr == 1
+			let wnr == winnr('$')
+		else
+			let wnr -= 1
+		endif
+		if getbufvar(winbufnr(wnr), '&buftype') == 'quickfix'
+			if &switchbuf =~ 'uselast' && (0 != winnr('#'))
+				let wnr = winnr('#')
+			elseif altwin != -1
+				let wnr = altwin
+			elseif 0 < winnr() - 1
+				let wnr = winnr() - 1
+			else
+				let wnr = winnr() + 1
+			endif
+		endif
+		if (altwin == -1) && !getbufvar(winbufnr(wnr), '&previewwindow') && empty(getbufvar(winbufnr(wnr), '&buftype'))
+			let altwin = wnr
+		endif
+	endwhile
+	return s:debug({ 'tabnr': tabpagenr(), 'winnr': wnr }, 'qf_goto_win_with_qfl_file')
 endfunction
 
 function! s:qf_open_new_file_win() abort
