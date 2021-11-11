@@ -53,7 +53,7 @@ function! s:qf_goto_win_with_qfl_file() abort
 	let altwin = -1
 	let curr = s:qf_curr()
 	while 1
-		if winbufnr(wnr) == curr['bufnr']
+		if winbufnr(wnr) == get(curr, 'bufnr')
 			break
 		endif
 		if wnr == 1
@@ -87,7 +87,7 @@ endfunction
 function! s:qf_goto_tabwin_with_file() abort
 	let wins = getwininfo()
 	let curr = s:qf_curr()
-	let xs = filter(deepcopy(wins), { i,x -> x['bufnr'] == curr['bufnr'] })
+	let xs = filter(deepcopy(wins), { i,x -> x['bufnr'] == get(curr, 'bufnr') })
 	if !empty(xs)
 		return s:debug({ 'tabnr': xs[0]['tabnr'], 'winnr': xs[0]['winnr'] }, 'qf_goto_tabwin_with_file')
 	else
