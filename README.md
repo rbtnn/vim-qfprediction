@@ -38,9 +38,9 @@ function! TabLineSub(n) abort
 	let x = qfprediction#get(a:n)
 	if has_key(x, 'tabnr') && has_key(x, 'winnr')
 		if tabpagenr() == x['tabnr']
-		return printf('win(%d)', x['winnr'])
+			return printf('win(%d)', x['winnr'])
 		else
-		return printf('win(%d) of tab(%d)', x['winnr'], x['tabnr'])
+			return printf('win(%d) of tab(%d)', x['winnr'], x['tabnr'])
 		endif
 	elseif has_key(x, 'split')
 		return 'split'
