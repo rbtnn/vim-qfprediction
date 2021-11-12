@@ -37,8 +37,8 @@ function! qfprediction#run_tests() abort
 		" +-----------------+
 		let x = [qfprediction#get(-1), qfprediction#get(), qfprediction#get(1)]
 		call assert_equal(
-			\ [winnr('$'), winnr('#'), [{}, {}, {}]],
-			\ [1, 0, x])
+			\ [1, 0, [{}, {}, {}]],
+			\ [winnr('$'), winnr('#'), x])
 
 		" +--------+
 		" |        |
@@ -48,8 +48,8 @@ function! qfprediction#run_tests() abort
 		copen
 		let x = [qfprediction#get(-1), qfprediction#get(), qfprediction#get(1)]
 		call assert_equal(
-			\ [winnr('$'), winnr('#'), [{ 'winnr': 1, 'tabnr': 1, }, { 'winnr': 1, 'tabnr': 1, }, { 'winnr': 1, 'tabnr': 1, }]],
-			\ [2, 1, x])
+			\ [2, 1, [{ 'winnr': 1, 'tabnr': 1, }, { 'winnr': 1, 'tabnr': 1, }, { 'winnr': 1, 'tabnr': 1, }]],
+			\ [winnr('$'), winnr('#'), x])
 
 		" +--------+
 		" |test.txt|
@@ -65,8 +65,11 @@ function! qfprediction#run_tests() abort
 			\ ['test.txt', 5, 1],
 			\ [fnamemodify(bufname(), ':t'), line('.'), col('.')])
 		call assert_equal(
-			\ [winnr('$'), winnr('#'), [{'winnr': 1, 'tabnr': 1}, {'winnr': 1, 'tabnr': 1}, {'winnr': 1, 'tabnr': 1}]],
-			\ [2, 2, x])
+			\ [2, 2, [{'winnr': 1, 'tabnr': 1}, {'winnr': 1, 'tabnr': 1}, {'winnr': 1, 'tabnr': 1}]],
+			\ [winnr('$'), winnr('#'), x])
+		call assert_equal(
+			\ [1],
+			\ [winnr()])
 
 		" +--------+--------+
 		" |test.txt|test.txt|
@@ -78,8 +81,12 @@ function! qfprediction#run_tests() abort
 		copen
 		let x = [qfprediction#get(-1), qfprediction#get(), qfprediction#get(1)]
 		call assert_equal(
-			\ [winnr('$'), winnr('#'), [{'winnr': 2, 'tabnr': 1}, {'winnr': 2, 'tabnr': 1}, {'winnr': 2, 'tabnr': 1}]],
-			\ [3, 1, x])
+			\ [3, 1, [{'winnr': 2, 'tabnr': 1}, {'winnr': 2, 'tabnr': 1}, {'winnr': 2, 'tabnr': 1}]],
+			\ [winnr('$'), winnr('#'), x])
+		call feedkeys("\<cr>", 'nx')
+		call assert_equal(
+			\ [2],
+			\ [winnr()])
 
 		" +-----------------+
 		" |                 |
@@ -91,8 +98,8 @@ function! qfprediction#run_tests() abort
 		only
 		let x = [qfprediction#get(-1), qfprediction#get(), qfprediction#get(1)]
 		call assert_equal(
-			\ [winnr('$'), winnr('#'), [{'winnr': 1, 'tabnr': 1}, {'winnr': 1, 'tabnr': 1}, {'winnr': 1, 'tabnr': 1}]],
-			\ [1, 0, x])
+			\ [1, 0, [{'winnr': 1, 'tabnr': 1}, {'winnr': 1, 'tabnr': 1}, {'winnr': 1, 'tabnr': 1}]],
+			\ [winnr('$'), winnr('#'), x])
 
 		" +-----------------+
 		" |help             |
@@ -105,8 +112,12 @@ function! qfprediction#run_tests() abort
 		copen
 		let x = [qfprediction#get(-1), qfprediction#get(), qfprediction#get(1)]
 		call assert_equal(
-			\ [winnr('$'), winnr('#'), [{'winnr': 1, 'tabnr': 1}, {'winnr': 1, 'tabnr': 1}, {'winnr': 1, 'tabnr': 1}]],
-			\ [3, 1, x])
+			\ [3, 1, [{'winnr': 1, 'tabnr': 1}, {'winnr': 1, 'tabnr': 1}, {'winnr': 1, 'tabnr': 1}]],
+			\ [winnr('$'), winnr('#'), x])
+		call feedkeys("\<cr>", 'nx')
+		call assert_equal(
+			\ [1],
+			\ [winnr()])
 
 		" +-----------------+
 		" |                 |
@@ -120,8 +131,12 @@ function! qfprediction#run_tests() abort
 		copen
 		let x = [qfprediction#get(-1), qfprediction#get(), qfprediction#get(1)]
 		call assert_equal(
-			\ [winnr('$'), winnr('#'), [{'winnr': 2, 'tabnr': 1}, {'winnr': 2, 'tabnr': 1}, {'winnr': 2, 'tabnr': 1}]],
-			\ [3, 2, x])
+			\ [3, 1, [{'winnr': 2, 'tabnr': 1}, {'winnr': 2, 'tabnr': 1}, {'winnr': 2, 'tabnr': 1}]],
+			\ [winnr('$'), winnr('#'), x])
+		call feedkeys("\<cr>", 'nx')
+		call assert_equal(
+			\ [2],
+			\ [winnr()])
 
 		" +-----------------+
 		" |                 |
@@ -137,8 +152,12 @@ function! qfprediction#run_tests() abort
 		copen
 		let x = [qfprediction#get(-1), qfprediction#get(), qfprediction#get(1)]
 		call assert_equal(
-			\ [winnr('$'), winnr('#'), [{'winnr': 3, 'tabnr': 1}, {'winnr': 3, 'tabnr': 1}, {'winnr': 3, 'tabnr': 1}]],
-			\ [4, 2, x])
+			\ [4, 2, [{'winnr': 3, 'tabnr': 1}, {'winnr': 3, 'tabnr': 1}, {'winnr': 3, 'tabnr': 1}]],
+			\ [winnr('$'), winnr('#'), x])
+		call feedkeys("\<cr>", 'nx')
+		call assert_equal(
+			\ [3],
+			\ [winnr()])
 
 		" +-----------------+
 		" |                 |
@@ -151,8 +170,8 @@ function! qfprediction#run_tests() abort
 		wincmd w
 		let x = [qfprediction#get(-1), qfprediction#get(), qfprediction#get(1)]
 		call assert_equal(
-			\ [winnr('$'), winnr('#'), [{'split': v:true}, {'split': v:true}, {'split': v:true}]],
-			\ [2, 2, x])
+			\ [2, 2, [{'split': v:true}, {'split': v:true}, {'split': v:true}]],
+			\ [winnr('$'), winnr('#'), x])
 
 		" +-----------------+
 		" |                 |
@@ -160,8 +179,6 @@ function! qfprediction#run_tests() abort
 		" |                 |
 		" +-----------------+
 		" |                 |
-		" +-----------------+
-		" |quickfix         |
 		" +-----------------+
 		set switchbuf=uselast
 		cclose
@@ -172,20 +189,34 @@ function! qfprediction#run_tests() abort
 		new
 		wincmd w
 		wincmd w
-
 		let x = [qfprediction#get(-1), qfprediction#get(), qfprediction#get(1)]
 		call assert_equal(
 			\ [3, 2, [{}, {'winnr': 3, 'tabnr': 1}, {'winnr': 3, 'tabnr': 1}]],
 			\ [winnr('$'), winnr('#'), x])
 
+		" +-----------------+
+		" |                 |
+		" +-----------------+
+		" |                 |
+		" +-----------------+
+		" |                 |
+		" +-----------------+
+		" |quickfix         |
+		" +-----------------+
+		wincmd w
+		wincmd w
+		call assert_equal(
+			\ [1],
+			\ [winnr('#')])
 		copen
-
 		let x = [qfprediction#get(-1), qfprediction#get(), qfprediction#get(1)]
 		call assert_equal(
-			\ [4, 3, [{'winnr': 3, 'tabnr': 1}, {'winnr': 3, 'tabnr': 1}, {'winnr': 3, 'tabnr': 1}]],
+			\ [4, 2, [{'winnr': 2, 'tabnr': 1}, {'winnr': 2, 'tabnr': 1}, {'winnr': 2, 'tabnr': 1}]],
 			\ [winnr('$'), winnr('#'), x])
-
-		call delete(s:TEST_TXT)
+		call feedkeys("\<cr>", 'nx')
+		call assert_equal(
+			\ [2],
+			\ [winnr()])
 
 		if !empty(v:errors)
 			let lines = []
@@ -209,6 +240,10 @@ function! qfprediction#run_tests() abort
 			endfor
 			call writefile(lines, s:TEST_LOG)
 		endif
+	catch 
+		call writefile([v:exception, v:throwpoint], s:TEST_LOG)
+	finally
+		call delete(s:TEST_TXT)
 	endtry
 endfunction
 
