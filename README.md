@@ -6,9 +6,9 @@ This plugin provides to tell you to which window for jumping when `:cnext`, `:cp
 ## Functions
 
 ### qfprediction#get([{n}])
-If {0} is 0 or not specified, returns which window for jumping when selecting an error in the quickfix window.
-If {0} is 1, returns which window for jumping when `:cnext`.
-If {0} is -1, returns which window for jumping when `:cprevious`.
+If {n} is 0 or not specified, returns which window for jumping when selecting an error in the quickfix window.  
+If {n} is 1, returns which window for jumping when `:cnext`.  
+If {n} is -1, returns which window for jumping when `:cprevious`.  
 
 ```
 " Will open a file of the error at the window of the return value when selecting an error in the quickfix window.
