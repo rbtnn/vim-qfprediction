@@ -49,10 +49,10 @@ function! TabLineSub(n) abort
 	endif
 endfunction
 function! TabLine() abort
-    let curr = TabLineSub(0)
-    let next = TabLineSub(1)
-    let prev = TabLineSub(-1)
-    return printf('[qfprediction] curr:%s, cnext:%s, cprev:%s', curr, next, prev)
+	let curr = TabLineSub(0)
+	let next = TabLineSub(1)
+	let prev = TabLineSub(-1)
+	return printf('[qfprediction] curr:%s, cnext:%s, cprev:%s', curr, next, prev)
 endfunction
 set showtabline=2
 set tabline=%!TabLine()
