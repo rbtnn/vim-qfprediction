@@ -1,18 +1,65 @@
 
-" This is base on the qf_jump_open_window function in {vim-repo}/src/quickfix.c.
+" This is base on the functions in {vim-repo}/src/quickfix.c.
 
-function! qfprediction#get() abort
-	let x = s:qf_jump_open_window()
+let s:TEST_LOG = expand('<sfile>:h:h:gs?\?/?') . '/test.log'
+
+function! qfprediction#get(...) abort
+	let n = 0 < a:0 ? a:1 : 0
+	if 1 < n
+		let n = 1
+	elseif n < -1
+		let n = -1
+	endif
+	let x = s:qf_jump_open_window(n)
 	if !empty(x)
 		return x
 	endif
-	return s:qf_jump_to_buffer()
+	return s:qf_jump_to_buffer(n)
+endfunction
+
+function! qfprediction#run_tests() abort
+	try
+		set nomore
+
+		if filereadable(s:TEST_LOG)
+			call delete(s:TEST_LOG)
+		endif
+
+		let v:errors = []
+
+		call assert_equal(
+			\ 1,
+			\ 1)
+
+		if !empty(v:errors)
+			let lines = []
+			for err in v:errors
+				let xs = split(err, '\(Expected\|but got\)')
+				echohl ErrorMsg
+				if 3 == len(xs)
+					let lines += [
+						\ xs[0],
+						\ '  Expected ' .. xs[1],
+						\ '  but got  ' .. xs[2],
+						\ ]
+					echo xs[0]
+					echo '  Expected ' .. xs[1]
+					echo '  but got  ' .. xs[2]
+				else
+					let lines += [err]
+					echo err
+				endif
+				echohl None
+			endfor
+			call writefile(lines, s:TEST_LOG)
+		endif
+	endtry
 endfunction
 
 
 
-function! s:qf_jump_to_buffer() abort
-	let curr = s:qf_curr()
+function! s:qf_jump_to_buffer(n) abort
+	let curr = s:qf_curr(a:n)
 	if !empty(curr)
 		return s:debug({ 'tabnr': tabpagenr(), 'winnr': winnr() }, 'qf_jump_to_buffer')
 	else
@@ -20,24 +67,24 @@ function! s:qf_jump_to_buffer() abort
 	endif
 endfunction
 
-function! s:qf_jump_open_window() abort
+function! s:qf_jump_open_window(n) abort
 	if s:is_helpgrep() && !s:bt_help()
 		return s:jump_to_help_window()
 	endif
 	if s:bt_quickfix()
-		return s:qf_jump_to_usable_window()
+		return s:qf_jump_to_usable_window(a:n)
 	endif
 	return {}
 endfunction
 
-function! s:qf_jump_to_usable_window() abort
+function! s:qf_jump_to_usable_window(n) abort
 	let usable_win = v:false
 	let x = s:qf_find_win_with_normal_buf()
 	if !empty(x)
 		let usable_win = v:true
 	endif
 	if !usable_win && (&switchbuf =~# 'usetab')
-		let x = s:qf_goto_tabwin_with_file()
+		let x = s:qf_goto_tabwin_with_file(a:n)
 		if !empty(x)
 			return x
 		endif
@@ -45,13 +92,13 @@ function! s:qf_jump_to_usable_window() abort
 	if ((winnr('$') == 1) && s:bt_quickfix()) || !usable_win
 		return s:qf_open_new_file_win()
 	endif
-	return s:qf_goto_win_with_qfl_file()
+	return s:qf_goto_win_with_qfl_file(a:n)
 endfunction
 
-function! s:qf_goto_win_with_qfl_file() abort
+function! s:qf_goto_win_with_qfl_file(n) abort
 	let wnr = winnr()
 	let altwin = -1
-	let curr = s:qf_curr()
+	let curr = s:qf_curr(a:n)
 	while 1
 		if winbufnr(wnr) == get(curr, 'bufnr')
 			break
@@ -84,9 +131,9 @@ function! s:qf_open_new_file_win() abort
 	return s:debug({ 'split': v:true, }, 'qf_open_new_file_win')
 endfunction
 
-function! s:qf_goto_tabwin_with_file() abort
+function! s:qf_goto_tabwin_with_file(n) abort
 	let wins = getwininfo()
-	let curr = s:qf_curr()
+	let curr = s:qf_curr(a:n)
 	let xs = filter(deepcopy(wins), { i,x -> x['bufnr'] == get(curr, 'bufnr') })
 	if !empty(xs)
 		return s:debug({ 'tabnr': xs[0]['tabnr'], 'winnr': xs[0]['winnr'] }, 'qf_goto_tabwin_with_file')
@@ -128,10 +175,11 @@ function! s:bt_help() abort
 	return &buftype == 'help'
 endfunction
 
-function! s:qf_curr() abort
-	let i = get(getqflist({ 'idx': 0 }), 'idx', 0)
-	if 0 < i
-		return getqflist()[i - 1]
+function! s:qf_curr(n) abort
+	let i = get(getqflist({ 'idx': 0 }), 'idx', 0) + a:n - 1
+	let xs = getqflist()
+	if (0 <= i) && (i < len(xs))
+		return xs[i]
 	else
 		return {}
 	endif

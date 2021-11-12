@@ -1,0 +1,75 @@
+*qfprediction.txt*  tell you to which window for jumping when using qf commands
+
+Author : rbtnn <naru123456789@gmail.com>
+LICENSE: MIT license (see LICENSE.txt)
+
+CONTENTS                                                 *qfprediction-contents*
+
+Functions                |qfprediction-functions|
+
+
+
+==============================================================================
+Functions                                               *qfprediction-functions*
+
+qfprediction#get([{n}])                                     *qfprediction#get()*
+	If {0} is 0 or not specified, returns which window for jumping when
+	selecting an error in the quickfix window.
+	If {0} is 1, returns which window for jumping when `:cnext`.
+	If {0} is -1, returns which window for jumping when `:cprevious`.
+>
+	" Will open a file of the error at the window of the return value
+	" when selecting an error in the quickfix window.
+	echo qfprediction#get()
+	" -> { 'winnr': 1, 'tabnr': 2, }
+
+
+	" Will open a file of the error at new window when `:cprevious`.
+	echo qfprediction#get(-1)
+	" -> { 'split': v:true, }
+
+
+	" Will open a file of the error at new window when `:cnext`.
+	echo qfprediction#get(1)
+	" -> { 'split': v:true, }
+
+
+	" Could not predict a window!
+	echo qfprediction#get()
+	" -> {}
+<
+	The following is an example of using qfprediction#get().
+>
+	function! TabLineSub(n) abort
+	    let x = qfprediction#get(a:n)
+	    if has_key(x, 'tabnr') && has_key(x, 'winnr')
+		if tabpagenr() == x['tabnr']
+		    return printf('win(%d)', x['winnr'])
+		else
+		    return printf('win(%d) of tab(%d)',
+			\ x['winnr'], x['tabnr'])
+		endif
+	    elseif has_key(x, 'split')
+		return 'split'
+	    else
+		return '?'
+	    endif
+	endfunction
+	function! TabLine() abort
+	    let curr = TabLineSub(0)
+	    let next = TabLineSub(1)
+	    let prev = TabLineSub(-1)
+	    return printf('[qfprediction] curr:%s, cnext:%s, cprev:%s',
+		\ curr, next, prev)
+	endfunction
+	set showtabline=2
+	set tabline=%!TabLine()
+	augroup qfprediction
+	    autocmd!
+	    autocmd WinEnter * :redrawtabline
+	augroup END
+<
+
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:noet:fen:fdl=0:

@@ -1,20 +1,28 @@
 
 # vim-qfprediction
 
-This plugin provides to tell you to which window for jumping  when `:cnext`, `:cprevious` and selecting an error in the quickfix window.
+This plugin provides to tell you to which window for jumping when `:cnext`, `:cprevious` and selecting an error in the quickfix window.
 
 ## Functions
 
-### qfprediction#get()
-Returns which window for jumping  when `:cnext`, `:cprevious` and selecting an error in the quickfix window.
+### qfprediction#get([{n}])
+If {0} is 0 or not specified, returns which window for jumping when selecting an error in the quickfix window.
+If {0} is 1, returns which window for jumping when `:cnext`.
+If {0} is -1, returns which window for jumping when `:cprevious`.
 
 ```
-" Will open a file of the error at the window of the return value.
+" Will open a file of the error at the window of the return value when selecting an error in the quickfix window.
 echo qfprediction#get()
 " -> { 'winnr': 1, 'tabnr': 2, }
 
-" Will open a file of the error at new window.
-echo qfprediction#get()
+
+" Will open a file of the error at new window when `:cprevious`.
+echo qfprediction#get(-1)
+" -> { 'split': v:true, }
+
+
+" Will open a file of the error at new window when `:cnext`.
+echo qfprediction#get(1)
 " -> { 'split': v:true, }
 
 
@@ -26,15 +34,25 @@ echo qfprediction#get()
 The following is an example of using qfprediction#get().
 
 ```
-function! TabLine() abort
-	let x = qfprediction#get()
+function! TabLineSub(n) abort
+	let x = qfprediction#get(a:n)
 	if has_key(x, 'tabnr') && has_key(x, 'winnr')
-		return printf('[qfprediction] Will open a file of the error at the window of tabnr:%d and winnr:%d.', x['tabnr'], x['winnr'])
+		if tabpagenr() == x['tabnr']
+		return printf('win(%d)', x['winnr'])
+		else
+		return printf('win(%d) of tab(%d)', x['winnr'], x['tabnr'])
+		endif
 	elseif has_key(x, 'split')
-		return '[qfprediction] Will open a file of the error at new window.'
+		return 'split'
 	else
-		return '[qfprediction] Could not predict a window!'
+		return '?'
 	endif
+endfunction
+function! TabLine() abort
+    let curr = TabLineSub(0)
+    let next = TabLineSub(1)
+    let prev = TabLineSub(-1)
+    return printf('[qfprediction] curr:%s, cnext:%s, cprev:%s', curr, next, prev)
 endfunction
 set showtabline=2
 set tabline=%!TabLine()
