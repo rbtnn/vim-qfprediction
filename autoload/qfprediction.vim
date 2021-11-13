@@ -1,5 +1,5 @@
 
-" This is base on the functions in {vim-repo}/src/quickfix.c.
+" This bases on the functions in {vim-repo}/src/quickfix.c.
 
 let s:TEST_LOG = expand('<sfile>:h:h:gs?\?/?') . '/test.log'
 let s:TEST_TXT = expand('<sfile>:h:h:gs?\?/?') . '/test.txt'
